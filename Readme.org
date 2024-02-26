@@ -1,0 +1,49 @@
+* 💦 Liquid Address
+** 📖 About
+This is a concept of a *non-custodial Lightning Address* provider that directs incoming payments to a predefined *Liquid* address.
+
+It can function independently as a standalone service or
+serve as a backup for other Lightning address providers.
+This is particularly useful for services directing incoming payments
+to mobile nodes that may not always be online.
+
+** 🔧 How It Works
+The service operates as a Lightning Address provider, following these steps when a request for an invoice is received:
+
+1. the service initiates a swap on the exchange
+2. it sends the invoice to the payer, who begins the payment process
+3. the service awaits the appearance of the swap transaction in the mempool
+4. upon detecting the transaction, it signs and broadcasts a claim transaction
+5. the exchange detects the claim transaction, settles the invoice
+6. the payer observes the successful completion of the payment
+
+All *trustless* and within a *matter of seconds* due to the use of zero-conf swaps
+(refer to security considerations below).
+
+*** Fees
+The exchange charges a *0.25%* fee for the service,
+plus approximately *500 sats* in on-chain fees.
+
+*** Limits
+The exchange imposes limits on the minimum and maximum amounts that can be swapped.
+Currently, the range is set at *1,000–25,000,000 sats* (0.50–12,000.00 EUR).
+
+** 🔐 Security Model
+*** Liquid Address
+During a swap, the service determines the Liquid address to swap to.
+While it has the potential to replace the user's address with its own,
+the impact is minimal as the service can always return an invoice to its own node.
+
+*** Zero-conf
+The service employs a zero-conf swap, meaning that once the swap transaction
+enters the mempool,
+it promptly signs and broadcasts a claiming transaction.
+While this opens up the possibility of the exchange attempting a double spend,
+the service can counteract this by providing proof of the initial swap transaction,
+what would result in significant reputational damage for the exchange.
+
+Although it is feasible to wait for one confirmation before broadcasting
+the claim transaction, doing so would introduce additional delays
+(up to one minute).
+Additionally, there is the flexibility to choose between a zero-conf swap
+or not based on the payment amount.
