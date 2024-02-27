@@ -17,7 +17,7 @@ The service operates as a Lightning Address provider, following these steps when
 5. the exchange detects the claim transaction, settles the invoice
 6. the payer observes the successful completion of the payment
 
-All *trustless* and within a *matter of seconds* due to the use of zero-conf swaps
+All *trustless* and within *a matter of seconds* due to the use of zero-conf swaps
 (refer to security considerations below).
 
 *** Fees
@@ -26,7 +26,7 @@ plus approximately *500 sats* in on-chain fees.
 
 *** Limits
 The exchange imposes limits on the minimum and maximum amounts that can be swapped.
-Currently, the range is set at *1,000–25,000,000 sats* (0.50–12,000.00 EUR).
+Currently, the range is set at *1,000–25,000,000 sats* (~0.50–12,000.00 EUR as of February 2024).
 
 ** 🔐 Security Model
 *** Liquid Address
@@ -34,7 +34,7 @@ During a swap, the service determines the Liquid address to swap to.
 While it has the potential to replace the user's address with its own,
 the impact is minimal as the service can always return an invoice to its own node.
 
-*** Zero-conf
+*** Zero-conf Swap
 The service employs a zero-conf swap, meaning that once the swap transaction
 enters the mempool,
 it promptly signs and broadcasts a claiming transaction.
@@ -47,3 +47,16 @@ the claim transaction, doing so would introduce additional delays
 (up to one minute).
 Additionally, there is the flexibility to choose between a zero-conf swap
 or not based on the payment amount.
+
+*** Privacy
+The current implementation reuses the Liquid address,
+enabling the exchange to learn the amounts and destinations of all payments.
+Additionally, common ownership of transactions is visible on the Liquid blockchain,
+but amounts are blinded.
+The issue can be addressed by utilizing an xpub and generating unique addresses for individual swaps,
+although if the recipient sweeps all UTXOs in one transaction,
+common ownership becomes obvious.
+
+** ♊ Similar Projects
+- [[https://npub.cash][npub.cash]]: A Lightning-Address powered by *eCash* and nostr
+- [[https://github.com/Kodylow/hermes][Hermes]]: A Lightning Address Messenger with *Fedimint*
