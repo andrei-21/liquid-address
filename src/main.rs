@@ -31,9 +31,7 @@ fn index(username: &str) -> String {
 #[get("/.well-known/lnurlp/liquid/callback?<amount>")]
 fn callback(amount: u64, pool: &State<ThreadPool>) -> String {
     dbg!(amount);
-    let to_address =
-        "VJLJPujJ83ZCH4sPEsASXfka82JmN33T6DS8uBKQtnnWwbJtXtuK2t6tJwsauSF8jSUtuStjFv4JPNsV"
-            .to_string();
+    let to_address = env!("TO_ADDRESS").to_string();
     let swap = create_swap(amount / 1000, to_address, Chain::Liquid).unwrap();
     let invoice = swap.response.invoice.clone().unwrap();
 
@@ -52,36 +50,12 @@ fn callback(amount: u64, pool: &State<ThreadPool>) -> String {
 
 #[launch]
 fn rocket() -> _ {
-    let pool = ThreadPool::new(8);
     let config = Config {
         port: 8001,
         ..Config::default()
     };
     rocket::build()
         .configure(config)
-        .manage(pool)
+        .manage(ThreadPool::new(8))
         .mount("/", routes![index, callback])
-}
-
-fn _foo_main() {
-    let pool = ThreadPool::new(8);
-
-    // Testnet
-    let to_address = "tlq1qqv4z28utgwunvn62s3aw0qjuw3sqgfdq6q8r8fesnawwnuctl70kdyedxw6tmxgqpq83x6ldsyr4n6cj0dm875k8g9k85w2s7".to_string();
-    let swap = create_swap(10_000, to_address, Chain::LiquidTestnet).unwrap();
-    println!(
-        "    **** Pay Invoice: {}",
-        swap.response.get_invoice().unwrap()
-    );
-    pool.execute(|| {
-        if let Err(e) = execute_swap(swap) {
-            eprintln!("{e:?}");
-        }
-    });
-
-    // Mainnet
-    //	let to_address = "VJLJPujJ83ZCH4sPEsASXfka82JmN33T6DS8uBKQtnnWwbJtXtuK2t6tJwsauSF8jSUtuStjFv4JPNsV".to_string();
-    //    let r = foo(1_000, to_address, Chain::Liquid);
-
-    pool.join();
 }
