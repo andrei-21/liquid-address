@@ -7,25 +7,15 @@ use rocket::{get, launch, routes, Config, State};
 use serde_json::json;
 use threadpool::ThreadPool;
 
-#[get("/.well-known/lnurlp/<username>")]
-fn index(username: &str) -> String {
-    match username {
-		"andrei" => r#"{"status":"OK","tag":"payRequest","commentAllowed":255,"callback":"https://getalby.com/lnurlp/andrei21/callback","metadata":"[[\"text/identifier\",\"andrei@zzd.es\"],[\"text/plain\",\"Sats for andrei\"]]","minSendable":1000,"maxSendable":11000000000,"payerData":{"name":{"mandatory":false},"email":{"mandatory":false}}}"#.to_string(),
-		"liquid" => {
-			let callback = "https://zzd.es/.well-known/lnurlp/liquid/callback";
-			let description = "Swap sats to liquid for Andrei";
-			let r = r#"{
-    "callback": "{callback}",
+#[get("/.well-known/lnurlp/liquid")]
+fn index() -> &'static str {
+    r#"{
+    "callback": "https://zzd.es/.well-known/lnurlp/liquid/callback",
     "maxSendable": 10000000,
     "minSendable": 1000000,
-    "metadata": "[[\"text/plain\",\"{description}\"]]",
+    "metadata": "[[\"text/plain\",\"Swap sats to liquid for Andrei\"]]",
     "tag": "payRequest"
-}
-"#;
-			r.replacen("{callback}", callback, 1).replacen("{description}", description, 1)
-		},
-		_ => "not found".to_string(),
-	}
+}"#
 }
 
 #[get("/.well-known/lnurlp/liquid/callback?<amount>")]

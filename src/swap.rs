@@ -110,7 +110,7 @@ pub fn execute_swap(swap: CreatedSwap) -> Result<(), Error> {
         _ => panic!("Unsupported chain"),
     };
     loop {
-        thread::sleep(Duration::from_secs(4));
+        thread::sleep(Duration::from_secs(2));
         let status = query_swap_status(boltz_v2_url, &swap.response.id)?;
         println!("Swap status: {status}");
         if status == "transaction.mempool" || status == "transaction.confirmed" {

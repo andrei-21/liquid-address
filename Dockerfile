@@ -1,9 +1,9 @@
 FROM rust:1.74 as builder
 
 WORKDIR /crates
-COPY ./src ./src
 COPY ./.cargo ./.cargo
 COPY Cargo.toml Cargo.lock ./
+COPY ./src ./src
 RUN --mount=type=cache,target=/usr/local/cargo/git \
     --mount=type=cache,target=/usr/local/cargo/registry \
     --mount=type=cache,sharing=private,target=/crates/target \
