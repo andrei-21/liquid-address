@@ -38,6 +38,49 @@ fn callback(amount: u64, pool: &State<ThreadPool>) -> String {
     .to_string()
 }
 
+#[get("/.well-known/lnurlp/hybrid")]
+fn index_hybrid() -> &'static str {
+    r#"{
+    "callback": "https://zzd.es/.well-known/lnurlp/hybrid/callback",
+    "maxSendable": 1000000000,
+    "minSendable": 1000,
+    "metadata": "[[\"text/plain\",\"Hybrid address of Andrei\"]]",
+    "tag": "payRequest"
+}"#
+}
+
+#[get("/.well-known/lnurlp/hybrid/callback?<amount>")]
+fn callback_hybrid(amount: u64, pool: &State<ThreadPool>) -> String {
+    dbg!(amount);
+    if amount < 10_000_000 {
+        let url = format!(
+            "https://getalby.com/lnurlp/andrei21/callback?amount={}",
+            amount
+        );
+        let response = ureq::get(&url).call().unwrap();
+        if response.status() != 200 {
+            panic!("getalby returnes status code: {}", response.status());
+        }
+        response.into_string().unwrap()
+    } else {
+        let to_address = env!("TO_ADDRESS").to_string();
+        let swap = create_swap(amount / 1000, to_address, Chain::Liquid).unwrap();
+        let invoice = swap.response.invoice.clone().unwrap();
+
+        pool.execute(|| {
+            if let Err(e) = execute_swap(swap) {
+                eprintln!("{e:?}");
+            }
+        });
+
+        json!({
+            "pr": invoice,
+            "routes": Vec::<()>::new(),
+        })
+        .to_string()
+    }
+}
+
 #[launch]
 fn rocket() -> _ {
     let config = Config {
@@ -47,5 +90,5 @@ fn rocket() -> _ {
     rocket::build()
         .configure(config)
         .manage(ThreadPool::new(8))
-        .mount("/", routes![index, callback])
+        .mount("/", routes![index, callback, index_hybrid, callback_hybrid])
 }
